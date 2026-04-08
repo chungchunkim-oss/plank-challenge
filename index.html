@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>💪 플랭크 매일 챌린지 - 2026년 4월</title>
-    <!-- CDN 방식으로 변경 (import 에러 해결) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -58,9 +57,18 @@
             border-bottom: 2px solid #667eea;
         }
 
-        .table-wrapper { overflow-x: auto; margin-bottom: 30px; }
+        .table-wrapper {
+            overflow-x: auto;
+            margin-bottom: 30px;
+            -webkit-overflow-scrolling: touch;
+        }
 
-        table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+            min-width: 1000px;
+        }
 
         th {
             background: #667eea;
@@ -71,22 +79,24 @@
             position: sticky;
             top: 0;
             z-index: 10;
+            white-space: nowrap;
         }
 
         td {
             padding: 12px 8px;
             text-align: center;
             border: 1px solid #e0e0e0;
+            white-space: nowrap;
         }
 
         td:first-child {
             background: #f8f9fa;
-            font-weight: 500;
+            font-weight: 600;
             text-align: left;
             position: sticky;
             left: 0;
             z-index: 5;
-            min-width: 100px;
+            min-width: 110px;
         }
 
         tr:nth-child(even) { background: #f8f9fa; }
@@ -97,6 +107,7 @@
             user-select: none;
             padding: 8px;
             transition: all 0.2s ease;
+            font-size: 1.1em;
         }
 
         .checkbox-cell.completed {
@@ -105,10 +116,20 @@
             font-weight: bold;
         }
 
-        .checkbox-cell:hover { background: #e3f2fd; border-radius: 4px; }
-        .checkbox-cell.completed:hover { background: #45a049 !important; }
+        .checkbox-cell:hover {
+            background: #e3f2fd;
+            border-radius: 4px;
+        }
 
-        .loading { text-align: center; padding: 40px; color: #667eea; }
+        .checkbox-cell.completed:hover {
+            background: #45a049 !important;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+        }
 
         .spinner {
             border: 4px solid #f3f3f3;
@@ -141,12 +162,79 @@
             margin-bottom: 20px;
             border-radius: 4px;
             color: #2e7d32;
+            line-height: 1.6;
+        }
+
+        .today-highlight {
+            background: #ffeb3b !important;
+            color: #333 !important;
+            font-weight: bold;
         }
 
         @media (max-width: 768px) {
-            .header h1 { font-size: 1.8em; }
-            table { font-size: 0.8em; }
-            td, th { padding: 8px 4px; }
+            body {
+                padding: 10px 5px;
+            }
+
+            .container {
+                border-radius: 12px;
+            }
+
+            .header {
+                padding: 24px 16px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+                line-height: 1.3;
+            }
+
+            .header p {
+                font-size: 0.95em;
+            }
+
+            .content {
+                padding: 15px 10px;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+                padding: 20px 12px;
+            }
+
+            .stat-number {
+                font-size: 1.5em;
+            }
+
+            .stat-label {
+                font-size: 0.8em;
+            }
+
+            table {
+                font-size: 0.78em;
+                min-width: 850px;
+            }
+
+            td, th {
+                padding: 8px 5px;
+            }
+
+            td:first-child {
+                min-width: 90px;
+                font-size: 0.85em;
+            }
+
+            .checkbox-cell {
+                font-size: 1em;
+                min-width: 34px;
+                min-height: 34px;
+            }
+
+            .info-box {
+                font-size: 0.92em;
+                padding: 12px;
+            }
         }
     </style>
 </head>
@@ -181,9 +269,10 @@
                 <strong>🏋️ 방법</strong><br>
                 매일 자신에 맞는 플랭크를 하시면 됩니다!
             </div>
+
             <div class="info-box">
                 <strong>✅ 실시간 동기화</strong><br>
-                테이블의 셀을 클릭하면 모든 참가자에게 즉시 반영됩니다! 다시 클릭하면 체크 해제됩니다.
+                테이블 셀을 클릭하면 모든 참가자에게 즉시 반영됩니다. 다시 클릭하면 체크 해제됩니다.
             </div>
 
             <h2 class="section-title">📋 체크 현황</h2>
@@ -196,7 +285,9 @@
             <div id="tableContainer" class="table-wrapper" style="display: none;">
                 <table id="challengeTable">
                     <thead>
-                        <tr id="headerRow"><th>참가자</th></tr>
+                        <tr id="headerRow">
+                            <th>참가자</th>
+                        </tr>
                     </thead>
                     <tbody id="tableBody"></tbody>
                 </table>
@@ -205,12 +296,13 @@
 
         <div class="footer">
             <p>💪 화이팅! 30일 동안 함께 플랭크 챌린지를 완료해봅시다!</p>
-            <p style="margin-top:10px;font-size:0.85em;color:#999;">Powered by Supabase | 실시간 데이터 동기화 활성화</p>
+            <p style="margin-top:10px;font-size:0.85em;color:#999;">
+                Powered by Supabase | 실시간 데이터 동기화 활성화
+            </p>
         </div>
     </div>
 
     <script>
-        // CDN 방식 (import 에러 없음!)
         const { createClient } = supabase;
 
         const SUPABASE_URL = 'https://glzxvredpmqpyzmpxdzd.supabase.co';
@@ -225,29 +317,48 @@
         ];
 
         const dates = [];
-        const startDate = new Date(2026, 3, 7);
+        const startDate = new Date(2026, 3, 7); // 2026-04-07
         for (let i = 0; i < 30; i++) {
             const date = new Date(startDate);
             date.setDate(date.getDate() + i);
-            dates.push(`${date.getMonth() + 1}/${date.getDate()}`);
+            dates.push({
+                label: `${date.getMonth() + 1}/${date.getDate()}`,
+                fullDate: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+            });
         }
 
         let data = {};
+        let tableCreated = false;
+        let realtimeSubscribed = false;
 
         async function loadData() {
             try {
                 const { data: records, error } = await client
                     .from('challenge')
                     .select('*');
+
                 if (error) throw error;
 
-                records.forEach(record => {
+                data = {};
+
+                (records || []).forEach(record => {
                     data[`${record.participant}-${record.date_index}`] = record.completed;
                 });
 
-                createTable();
+                if (!tableCreated) {
+                    createTable();
+                    tableCreated = true;
+                } else {
+                    refreshTable();
+                }
+
                 updateStats();
-                setupRealtimeSubscription();
+
+                if (!realtimeSubscribed) {
+                    setupRealtimeSubscription();
+                    realtimeSubscribed = true;
+                }
+
             } catch (error) {
                 console.error('Error loading data:', error);
                 document.getElementById('loading').innerHTML =
@@ -257,26 +368,45 @@
 
         function createTable() {
             const headerRow = document.getElementById('headerRow');
-            dates.forEach(date => {
+            headerRow.innerHTML = '<th>참가자</th>';
+
+            const todayStr = getTodayKST();
+
+            dates.forEach((dateObj, index) => {
                 const th = document.createElement('th');
-                th.textContent = date;
+                th.textContent = dateObj.label;
+                if (dateObj.fullDate === todayStr) {
+                    th.classList.add('today-highlight');
+                }
+                th.dataset.dateIndex = index;
                 headerRow.appendChild(th);
             });
 
             const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
             participants.forEach(participant => {
                 const row = document.createElement('tr');
+
                 const nameCell = document.createElement('td');
                 nameCell.textContent = participant;
-                nameCell.style.fontWeight = '600';
                 row.appendChild(nameCell);
 
-                dates.forEach((date, dateIndex) => {
+                dates.forEach((dateObj, dateIndex) => {
                     const cell = document.createElement('td');
                     const isChecked = data[`${participant}-${dateIndex}`] === true;
+
                     cell.classList.add('checkbox-cell');
                     cell.textContent = isChecked ? '✅' : '⬜';
-                    if (isChecked) cell.classList.add('completed');
+
+                    if (isChecked) {
+                        cell.classList.add('completed');
+                    }
+
+                    if (dateObj.fullDate === todayStr) {
+                        cell.style.boxShadow = 'inset 0 0 0 2px #ffeb3b';
+                    }
+
                     cell.onclick = () => toggleCell(participant, dateIndex, cell);
                     row.appendChild(cell);
                 });
@@ -288,32 +418,67 @@
             document.getElementById('tableContainer').style.display = 'block';
         }
 
+        function refreshTable() {
+            participants.forEach(participant => {
+                dates.forEach((dateObj, dateIndex) => {
+                    updateTableCell(participant, dateIndex);
+                });
+            });
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('tableContainer').style.display = 'block';
+        }
+
         async function toggleCell(participant, dateIndex, cell) {
-            const isCurrentlyCompleted = data[`${participant}-${dateIndex}`] === true;
+            const key = `${participant}-${dateIndex}`;
+            const isCurrentlyCompleted = data[key] === true;
             const newValue = !isCurrentlyCompleted;
+
+            // 클릭 즉시 화면 반영 (UX 향상)
+            data[key] = newValue;
+            cell.textContent = newValue ? '✅' : '⬜';
+            cell.classList.toggle('completed', newValue);
+            updateStats();
 
             try {
                 const { error } = await client
                     .from('challenge')
-                    .update({ completed: newValue })
-                    .eq('participant', participant)
-                    .eq('date_index', dateIndex);
+                    .upsert(
+                        [{
+                            participant: participant,
+                            date_index: dateIndex,
+                            completed: newValue
+                        }],
+                        {
+                            onConflict: 'participant,date_index'
+                        }
+                    );
+
                 if (error) throw error;
 
-                data[`${participant}-${dateIndex}`] = newValue;
-                cell.textContent = newValue ? '✅' : '⬜';
-                cell.classList.toggle('completed');
-                updateStats();
             } catch (error) {
                 console.error('Error updating:', error);
+
+                // 실패 시 롤백
+                data[key] = isCurrentlyCompleted;
+                cell.textContent = isCurrentlyCompleted ? '✅' : '⬜';
+                cell.classList.toggle('completed', isCurrentlyCompleted);
+                updateStats();
+
                 alert('업데이트 실패: ' + error.message);
             }
         }
 
         function updateStats() {
             let totalCompleted = 0;
-            Object.values(data).forEach(val => { if (val === true) totalCompleted++; });
-            const completionRate = Math.round((totalCompleted / (participants.length * 30)) * 100);
+
+            Object.values(data).forEach(val => {
+                if (val === true) totalCompleted++;
+            });
+
+            const totalPossible = participants.length * dates.length;
+            const completionRate = Math.round((totalCompleted / totalPossible) * 100);
+
             document.getElementById('totalCompleted').textContent = totalCompleted;
             document.getElementById('completionRate').textContent = completionRate + '%';
         }
@@ -321,30 +486,47 @@
         function setupRealtimeSubscription() {
             client
                 .channel('challenge_changes')
-                .on('postgres_changes',
+                .on(
+                    'postgres_changes',
                     { event: '*', schema: 'public', table: 'challenge' },
                     (payload) => {
                         const record = payload.new;
+                        if (!record) return;
+
                         const key = `${record.participant}-${record.date_index}`;
                         data[key] = record.completed;
                         updateTableCell(record.participant, record.date_index);
                         updateStats();
                     }
                 )
-                .subscribe();
+                .subscribe((status) => {
+                    console.log('Realtime status:', status);
+                });
         }
 
         function updateTableCell(participant, dateIndex) {
             const rows = document.querySelectorAll('#tableBody tr');
             const participantIndex = participants.indexOf(participant);
-            if (participantIndex !== -1) {
-                const cell = rows[participantIndex].querySelectorAll('td')[dateIndex + 1];
+
+            if (participantIndex !== -1 && rows[participantIndex]) {
+                const cells = rows[participantIndex].querySelectorAll('td');
+                const cell = cells[dateIndex + 1];
+
                 if (cell) {
                     const isCompleted = data[`${participant}-${dateIndex}`] === true;
                     cell.textContent = isCompleted ? '✅' : '⬜';
                     cell.classList.toggle('completed', isCompleted);
                 }
             }
+        }
+
+        function getTodayKST() {
+            const now = new Date();
+            const kst = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
+            const yyyy = kst.getFullYear();
+            const mm = String(kst.getMonth() + 1).padStart(2, '0');
+            const dd = String(kst.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
         }
 
         loadData();
