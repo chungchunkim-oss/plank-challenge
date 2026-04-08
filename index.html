@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>💪 플랭크 매일 챌린지 - 2026년 4월</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -16,7 +16,7 @@
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
@@ -67,7 +67,7 @@
             width: 100%;
             border-collapse: collapse;
             font-size: 0.9em;
-            min-width: 1000px;
+            min-width: 1300px;
         }
 
         th {
@@ -89,14 +89,27 @@
             white-space: nowrap;
         }
 
-        td:first-child {
+        td.sticky-col {
             background: #f8f9fa;
             font-weight: 600;
-            text-align: left;
             position: sticky;
+            z-index: 6;
+        }
+
+        td.rank-col, th.rank-col {
             left: 0;
-            z-index: 5;
+            min-width: 70px;
+        }
+
+        td.name-col, th.name-col {
+            left: 70px;
             min-width: 110px;
+            text-align: left;
+        }
+
+        td.count-col, th.count-col {
+            left: 180px;
+            min-width: 90px;
         }
 
         tr:nth-child(even) { background: #f8f9fa; }
@@ -171,6 +184,26 @@
             font-weight: bold;
         }
 
+        .rank-badge {
+            display: inline-block;
+            min-width: 34px;
+            padding: 4px 8px;
+            border-radius: 999px;
+            font-weight: bold;
+            background: #e8ecff;
+            color: #4b57c5;
+        }
+
+        .rank-1 { background: #ffd700; color: #333; }
+        .rank-2 { background: #c0c0c0; color: #333; }
+        .rank-3 { background: #cd7f32; color: white; }
+
+        .count-badge {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.05em;
+        }
+
         @media (max-width: 768px) {
             body {
                 padding: 10px 5px;
@@ -213,16 +246,26 @@
 
             table {
                 font-size: 0.78em;
-                min-width: 850px;
+                min-width: 1200px;
             }
 
             td, th {
                 padding: 8px 5px;
             }
 
-            td:first-child {
+            td.rank-col, th.rank-col {
+                min-width: 55px;
+            }
+
+            td.name-col, th.name-col {
                 min-width: 90px;
+                left: 55px;
                 font-size: 0.85em;
+            }
+
+            td.count-col, th.count-col {
+                min-width: 70px;
+                left: 145px;
             }
 
             .checkbox-cell {
@@ -256,11 +299,11 @@
             </div>
             <div class="stat-box">
                 <div class="stat-number" id="totalCompleted">0</div>
-                <div class="stat-label">완료 횟수</div>
+                <div class="stat-label">전체 완료 횟수</div>
             </div>
             <div class="stat-box">
                 <div class="stat-number" id="completionRate">0%</div>
-                <div class="stat-label">완료율</div>
+                <div class="stat-label">전체 완료율</div>
             </div>
         </div>
 
@@ -271,11 +314,11 @@
             </div>
 
             <div class="info-box">
-                <strong>✅ 실시간 동기화</strong><br>
-                테이블 셀을 클릭하면 모든 참가자에게 즉시 반영됩니다. 다시 클릭하면 체크 해제됩니다.
+                <strong>🏆 순위 자동 반영</strong><br>
+                완료 횟수에 따라 순위가 자동으로 갱신됩니다. 셀을 클릭하면 실시간 반영됩니다.
             </div>
 
-            <h2 class="section-title">📋 체크 현황</h2>
+            <h2 class="section-title">📋 체크 현황 + 순위표</h2>
 
             <div id="loading" class="loading">
                 <div class="spinner"></div>
@@ -286,7 +329,9 @@
                 <table id="challengeTable">
                     <thead>
                         <tr id="headerRow">
-                            <th>참가자</th>
+                            <th class="rank-col">순위</th>
+                            <th class="name-col">참가자</th>
+                            <th class="count-col">완료</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody"></tbody>
@@ -317,7 +362,7 @@
         ];
 
         const dates = [];
-        const startDate = new Date(2026, 3, 7); // 2026-04-07
+        const startDate = new Date(2026, 3, 7);
         for (let i = 0; i < 30; i++) {
             const date = new Date(startDate);
             date.setDate(date.getDate() + i);
@@ -349,7 +394,7 @@
                     createTable();
                     tableCreated = true;
                 } else {
-                    refreshTable();
+                    renderTable();
                 }
 
                 updateStats();
@@ -366,9 +411,43 @@
             }
         }
 
+        function getParticipantCount(participant) {
+            let count = 0;
+            dates.forEach((_, dateIndex) => {
+                if (data[`${participant}-${dateIndex}`] === true) count++;
+            });
+            return count;
+        }
+
+        function getRankedParticipants() {
+            const ranked = participants.map(name => ({
+                name,
+                count: getParticipantCount(name)
+            }));
+
+            ranked.sort((a, b) => {
+                if (b.count !== a.count) return b.count - a.count;
+                return a.name.localeCompare(b.name, 'ko');
+            });
+
+            let currentRank = 1;
+            for (let i = 0; i < ranked.length; i++) {
+                if (i > 0 && ranked[i].count < ranked[i - 1].count) {
+                    currentRank = i + 1;
+                }
+                ranked[i].rank = currentRank;
+            }
+
+            return ranked;
+        }
+
         function createTable() {
             const headerRow = document.getElementById('headerRow');
-            headerRow.innerHTML = '<th>참가자</th>';
+            headerRow.innerHTML = `
+                <th class="rank-col">순위</th>
+                <th class="name-col">참가자</th>
+                <th class="count-col">완료</th>
+            `;
 
             const todayStr = getTodayKST();
 
@@ -382,19 +461,40 @@
                 headerRow.appendChild(th);
             });
 
+            renderTable();
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('tableContainer').style.display = 'block';
+        }
+
+        function renderTable() {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
 
-            participants.forEach(participant => {
+            const rankedParticipants = getRankedParticipants();
+            const todayStr = getTodayKST();
+
+            rankedParticipants.forEach(({ name, count, rank }) => {
                 const row = document.createElement('tr');
 
+                const rankCell = document.createElement('td');
+                rankCell.className = 'sticky-col rank-col';
+                rankCell.innerHTML = `<span class="rank-badge ${rank <= 3 ? `rank-${rank}` : ''}">${rank}위</span>`;
+                row.appendChild(rankCell);
+
                 const nameCell = document.createElement('td');
-                nameCell.textContent = participant;
+                nameCell.className = 'sticky-col name-col';
+                nameCell.textContent = name;
                 row.appendChild(nameCell);
+
+                const countCell = document.createElement('td');
+                countCell.className = 'sticky-col count-col';
+                countCell.innerHTML = `<span class="count-badge">${count}회</span>`;
+                row.appendChild(countCell);
 
                 dates.forEach((dateObj, dateIndex) => {
                     const cell = document.createElement('td');
-                    const isChecked = data[`${participant}-${dateIndex}`] === true;
+                    const isChecked = data[`${name}-${dateIndex}`] === true;
 
                     cell.classList.add('checkbox-cell');
                     cell.textContent = isChecked ? '✅' : '⬜';
@@ -407,7 +507,7 @@
                         cell.style.boxShadow = 'inset 0 0 0 2px #ffeb3b';
                     }
 
-                    cell.onclick = () => toggleCell(participant, dateIndex, cell);
+                    cell.onclick = () => toggleCell(name, dateIndex);
                     row.appendChild(cell);
                 });
 
@@ -418,26 +518,13 @@
             document.getElementById('tableContainer').style.display = 'block';
         }
 
-        function refreshTable() {
-            participants.forEach(participant => {
-                dates.forEach((dateObj, dateIndex) => {
-                    updateTableCell(participant, dateIndex);
-                });
-            });
-
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('tableContainer').style.display = 'block';
-        }
-
-        async function toggleCell(participant, dateIndex, cell) {
+        async function toggleCell(participant, dateIndex) {
             const key = `${participant}-${dateIndex}`;
             const isCurrentlyCompleted = data[key] === true;
             const newValue = !isCurrentlyCompleted;
 
-            // 클릭 즉시 화면 반영 (UX 향상)
             data[key] = newValue;
-            cell.textContent = newValue ? '✅' : '⬜';
-            cell.classList.toggle('completed', newValue);
+            renderTable();
             updateStats();
 
             try {
@@ -459,10 +546,8 @@
             } catch (error) {
                 console.error('Error updating:', error);
 
-                // 실패 시 롤백
                 data[key] = isCurrentlyCompleted;
-                cell.textContent = isCurrentlyCompleted ? '✅' : '⬜';
-                cell.classList.toggle('completed', isCurrentlyCompleted);
+                renderTable();
                 updateStats();
 
                 alert('업데이트 실패: ' + error.message);
@@ -495,29 +580,13 @@
 
                         const key = `${record.participant}-${record.date_index}`;
                         data[key] = record.completed;
-                        updateTableCell(record.participant, record.date_index);
+                        renderTable();
                         updateStats();
                     }
                 )
                 .subscribe((status) => {
                     console.log('Realtime status:', status);
                 });
-        }
-
-        function updateTableCell(participant, dateIndex) {
-            const rows = document.querySelectorAll('#tableBody tr');
-            const participantIndex = participants.indexOf(participant);
-
-            if (participantIndex !== -1 && rows[participantIndex]) {
-                const cells = rows[participantIndex].querySelectorAll('td');
-                const cell = cells[dateIndex + 1];
-
-                if (cell) {
-                    const isCompleted = data[`${participant}-${dateIndex}`] === true;
-                    cell.textContent = isCompleted ? '✅' : '⬜';
-                    cell.classList.toggle('completed', isCompleted);
-                }
-            }
         }
 
         function getTodayKST() {
