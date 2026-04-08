@@ -4,13 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>💪 플랭크 매일 챌린지 - 2026년 4월</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/+esm"></script>
+    <!-- CDN 방식으로 변경 (import 에러 해결) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -24,7 +21,7 @@
             margin: 0 auto;
             background: white;
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             overflow: hidden;
         }
 
@@ -35,15 +32,8 @@
             text-align: center;
         }
 
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
-
-        .header p {
-            font-size: 1.1em;
-            opacity: 0.95;
-        }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .header p { font-size: 1.1em; opacity: 0.95; }
 
         .stats {
             display: grid;
@@ -54,25 +44,11 @@
             border-bottom: 1px solid #e0e0e0;
         }
 
-        .stat-box {
-            text-align: center;
-        }
+        .stat-box { text-align: center; }
+        .stat-number { font-size: 2em; font-weight: bold; color: #667eea; }
+        .stat-label { color: #666; font-size: 0.9em; margin-top: 5px; }
 
-        .stat-number {
-            font-size: 2em;
-            font-weight: bold;
-            color: #667eea;
-        }
-
-        .stat-label {
-            color: #666;
-            font-size: 0.9em;
-            margin-top: 5px;
-        }
-
-        .content {
-            padding: 30px;
-        }
+        .content { padding: 30px; }
 
         .section-title {
             font-size: 1.4em;
@@ -82,16 +58,9 @@
             border-bottom: 2px solid #667eea;
         }
 
-        .table-wrapper {
-            overflow-x: auto;
-            margin-bottom: 30px;
-        }
+        .table-wrapper { overflow-x: auto; margin-bottom: 30px; }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9em;
-        }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
 
         th {
             background: #667eea;
@@ -120,13 +89,8 @@
             min-width: 100px;
         }
 
-        tr:nth-child(even) {
-            background: #f8f9fa;
-        }
-
-        tr:hover {
-            background: #f0f4ff;
-        }
+        tr:nth-child(even) { background: #f8f9fa; }
+        tr:hover { background: #f0f4ff; }
 
         .checkbox-cell {
             cursor: pointer;
@@ -141,20 +105,10 @@
             font-weight: bold;
         }
 
-        .checkbox-cell:hover {
-            background: #e3f2fd;
-            border-radius: 4px;
-        }
+        .checkbox-cell:hover { background: #e3f2fd; border-radius: 4px; }
+        .checkbox-cell.completed:hover { background: #45a049 !important; }
 
-        .checkbox-cell.completed:hover {
-            background: #45a049 !important;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #667eea;
-        }
+        .loading { text-align: center; padding: 40px; color: #667eea; }
 
         .spinner {
             border: 4px solid #f3f3f3;
@@ -190,17 +144,9 @@
         }
 
         @media (max-width: 768px) {
-            .header h1 {
-                font-size: 1.8em;
-            }
-
-            table {
-                font-size: 0.8em;
-            }
-
-            td, th {
-                padding: 8px 4px;
-            }
+            .header h1 { font-size: 1.8em; }
+            table { font-size: 0.8em; }
+            td, th { padding: 8px 4px; }
         }
     </style>
 </head>
@@ -232,6 +178,10 @@
 
         <div class="content">
             <div class="info-box">
+                <strong>🏋️ 방법</strong><br>
+                매일 자신에 맞는 플랭크를 하시면 됩니다!
+            </div>
+            <div class="info-box">
                 <strong>✅ 실시간 동기화</strong><br>
                 테이블의 셀을 클릭하면 모든 참가자에게 즉시 반영됩니다! 다시 클릭하면 체크 해제됩니다.
             </div>
@@ -246,30 +196,27 @@
             <div id="tableContainer" class="table-wrapper" style="display: none;">
                 <table id="challengeTable">
                     <thead>
-                        <tr id="headerRow">
-                            <th>참가자</th>
-                        </tr>
+                        <tr id="headerRow"><th>참가자</th></tr>
                     </thead>
-                    <tbody id="tableBody">
-                    </tbody>
+                    <tbody id="tableBody"></tbody>
                 </table>
             </div>
         </div>
 
         <div class="footer">
             <p>💪 화이팅! 30일 동안 함께 플랭크 챌린지를 완료해봅시다!</p>
-            <p style="margin-top: 10px; font-size: 0.85em; color: #999;">Powered by Supabase | 실시간 데이터 동기화 활성화</p>
+            <p style="margin-top:10px;font-size:0.85em;color:#999;">Powered by Supabase | 실시간 데이터 동기화 활성화</p>
         </div>
     </div>
 
-    <script type="module">
-        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/+esm'
+    <script>
+        // CDN 방식 (import 에러 없음!)
+        const { createClient } = supabase;
 
-        // ⚠️ Supabase API 정보
         const SUPABASE_URL = 'https://glzxvredpmqpyzmpxdzd.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_ea-DM9K8IzX3lBL0qUb6qg_tMYYE7vU';
 
-        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+        const client = createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const participants = [
             '김복기', '김성민', '김유진', '김진아', '김철민', '김한봉희',
@@ -279,42 +226,35 @@
 
         const dates = [];
         const startDate = new Date(2026, 3, 7);
-
         for (let i = 0; i < 30; i++) {
             const date = new Date(startDate);
             date.setDate(date.getDate() + i);
-            const month = date.getMonth() + 1;
-            const day = date.getDate();
-            dates.push(`${month}/${day}`);
+            dates.push(`${date.getMonth() + 1}/${date.getDate()}`);
         }
 
         let data = {};
 
-        // 데이터 로드
         async function loadData() {
             try {
-                const { data: records, error } = await supabase
+                const { data: records, error } = await client
                     .from('challenge')
                     .select('*');
-
                 if (error) throw error;
 
                 records.forEach(record => {
-                    const key = `${record.participant}-${record.date_index}`;
-                    data[key] = record.completed;
+                    data[`${record.participant}-${record.date_index}`] = record.completed;
                 });
 
                 createTable();
                 updateStats();
                 setupRealtimeSubscription();
-
             } catch (error) {
                 console.error('Error loading data:', error);
-                document.getElementById('loading').innerHTML = '<p style="color: red;">데이터 로드 실패. 페이지를 새로고침하세요.</p>';
+                document.getElementById('loading').innerHTML =
+                    '<p style="color:red;">데이터 로드 실패: ' + error.message + '</p>';
             }
         }
 
-        // 테이블 생성
         function createTable() {
             const headerRow = document.getElementById('headerRow');
             dates.forEach(date => {
@@ -333,16 +273,10 @@
 
                 dates.forEach((date, dateIndex) => {
                     const cell = document.createElement('td');
-                    const key = `${participant}-${dateIndex}`;
-                    const isChecked = data[key] === true;
-
+                    const isChecked = data[`${participant}-${dateIndex}`] === true;
                     cell.classList.add('checkbox-cell');
                     cell.textContent = isChecked ? '✅' : '⬜';
-
-                    if (isChecked) {
-                        cell.classList.add('completed');
-                    }
-
+                    if (isChecked) cell.classList.add('completed');
                     cell.onclick = () => toggleCell(participant, dateIndex, cell);
                     row.appendChild(cell);
                 });
@@ -354,58 +288,45 @@
             document.getElementById('tableContainer').style.display = 'block';
         }
 
-        // 셀 토글
         async function toggleCell(participant, dateIndex, cell) {
             const isCurrentlyCompleted = data[`${participant}-${dateIndex}`] === true;
             const newValue = !isCurrentlyCompleted;
 
             try {
-                const { error } = await supabase
+                const { error } = await client
                     .from('challenge')
                     .update({ completed: newValue })
                     .eq('participant', participant)
                     .eq('date_index', dateIndex);
-
                 if (error) throw error;
 
                 data[`${participant}-${dateIndex}`] = newValue;
                 cell.textContent = newValue ? '✅' : '⬜';
                 cell.classList.toggle('completed');
                 updateStats();
-
             } catch (error) {
-                console.error('Error updating data:', error);
-                alert('업데이트 실패. 다시 시도해주세요.');
+                console.error('Error updating:', error);
+                alert('업데이트 실패: ' + error.message);
             }
         }
 
-        // 통계 업데이트
         function updateStats() {
             let totalCompleted = 0;
-            Object.values(data).forEach(val => {
-                if (val === true) totalCompleted++;
-            });
-
-            const totalPossible = participants.length * 30;
-            const completionRate = Math.round((totalCompleted / totalPossible) * 100);
-
+            Object.values(data).forEach(val => { if (val === true) totalCompleted++; });
+            const completionRate = Math.round((totalCompleted / (participants.length * 30)) * 100);
             document.getElementById('totalCompleted').textContent = totalCompleted;
             document.getElementById('completionRate').textContent = completionRate + '%';
         }
 
-        // 실시간 구독 (다른 사용자 변경 감지)
         function setupRealtimeSubscription() {
-            supabase
+            client
                 .channel('challenge_changes')
-                .on(
-                    'postgres_changes',
+                .on('postgres_changes',
                     { event: '*', schema: 'public', table: 'challenge' },
                     (payload) => {
                         const record = payload.new;
                         const key = `${record.participant}-${record.date_index}`;
                         data[key] = record.completed;
-
-                        // UI 업데이트
                         updateTableCell(record.participant, record.date_index);
                         updateStats();
                     }
@@ -413,15 +334,11 @@
                 .subscribe();
         }
 
-        // 테이블 셀 업데이트 (다른 사용자 변경)
         function updateTableCell(participant, dateIndex) {
             const rows = document.querySelectorAll('#tableBody tr');
             const participantIndex = participants.indexOf(participant);
-
             if (participantIndex !== -1) {
-                const row = rows[participantIndex];
-                const cell = row.querySelectorAll('td')[dateIndex + 1];
-
+                const cell = rows[participantIndex].querySelectorAll('td')[dateIndex + 1];
                 if (cell) {
                     const isCompleted = data[`${participant}-${dateIndex}`] === true;
                     cell.textContent = isCompleted ? '✅' : '⬜';
@@ -430,7 +347,6 @@
             }
         }
 
-        // 초기 데이터 로드
         loadData();
     </script>
 </body>
